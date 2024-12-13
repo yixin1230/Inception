@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - wordpress
+    networks:
+      - app-network
+
+  wordpress:
+    build:
+      context: ./wordpress
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_USER: your_user
+      WORDPRESS_DB_PASSWORD: your_password
+      WORDPRESS_DB_NAME: your_database
+    volumes:
+      - wordpress-data:/var/www/html
+    depends_on:
+      - mariadb
+    networks:
+      - app-network
+
+  mariadb:
+    build:
+      context: ./mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password
+      MYSQL_DATABASE: your_database
+      MYSQL_USER: your_user
+      MYSQL_PASSWORD: your_password
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  wordpress-data:
+  db-data:
+
+networks:
+  app-network:
